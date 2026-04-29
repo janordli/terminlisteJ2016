@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ullern J10/J11 — Kampplan 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --blue-light: #E6F1FB; --blue-mid: #185FA5; --blue-dark: #0C447C;
+    --amber-light: #FAEEDA; --amber-mid: #BA7517; --amber-dark: #633806;
+    --teal-light: #E1F5EE; --teal-mid: #0F6E56; --teal-dark: #085041;
+    --red-light: #FCEBEB; --red-mid: #E24B4A; --red-dark: #A32D2D;
+    --gray-bg: #F6F5F2; --gray-border: rgba(0,0,0,0.08);
+    --gray-border-strong: rgba(0,0,0,0.14); --text-primary: #1a1a18;
+    --text-secondary: #6b6a65; --text-hint: #9e9d97;
+  }
+  body { font-family: 'DM Sans', sans-serif; background: var(--gray-bg); color: var(--text-primary); min-height: 100vh; padding: 2rem 1rem; }
+  .container { max-width: 900px; margin: 0 auto; }
+  header { margin-bottom: 2rem; }
+  .header-top { display: flex; align-items: baseline; gap: 12px; margin-bottom: 4px; }
+  h1 { font-size: 22px; font-weight: 600; letter-spacing: -0.02em; }
+  .season-tag { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text-secondary); background: white; border: 0.5px solid var(--gray-border-strong); padding: 3px 8px; border-radius: 4px; }
+  .header-sub { font-size: 13px; color: var(--text-secondary); }
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 1.5rem; }
+  .stat { background: white; border: 0.5px solid var(--gray-border); border-radius: 10px; padding: 12px 16px; }
+  .stat-label { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-hint); margin-bottom: 4px; }
+  .stat-num { font-size: 28px; font-weight: 600; letter-spacing: -0.03em; }
+  .stat-num.blue { color: var(--blue-mid); }
+  .stat-num.amber { color: var(--amber-mid); }
+  .stat-num.teal { color: var(--teal-mid); }
+  .stat-num.red { color: var(--red-mid); }
+  .conflict-alert { background: var(--red-light); border: 0.5px solid #F09595; border-radius: 10px; padding: 10px 14px; font-size: 13px; color: var(--red-dark); margin-bottom: 1.5rem; line-height: 1.6; }
+  .conflict-alert strong { font-weight: 600; }
+  .legend { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 1rem; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-secondary); }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .filters { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 1.5rem; }
+  .filter-btn { padding: 7px 14px; border-radius: 20px; border: 0.5px solid var(--gray-border-strong); background: white; color: var(--text-secondary); font-size: 13px; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: all 0.12s ease; font-weight: 400; }
+  .filter-btn:hover { background: var(--gray-bg); color: var(--text-primary); }
+  .filter-btn.active { background: var(--text-primary); color: white; border-color: var(--text-primary); font-weight: 500; }
+  .month-group { margin-bottom: 1.5rem; }
+  .month-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-hint); margin-bottom: 8px; padding-left: 4px; }
+  .row { display: grid; grid-template-columns: 60px 48px 90px 1fr 130px; gap: 10px; align-items: center; padding: 10px 14px; border-radius: 8px; border: 0.5px solid var(--gray-border); background: white; margin-bottom: 3px; transition: border-color 0.1s; }
+  .row:hover { border-color: var(--gray-border-strong); }
+  .row.conflict { border-left: 2.5px solid var(--red-mid); }
+  .date { font-family: 'DM Mono', monospace; font-size: 12px; font-weight: 500; color: var(--text-primary); }
+  .time { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text-secondary); }
+  .badge { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; text-align: center; letter-spacing: 0.02em; white-space: nowrap; }
+  .badge.dolphins { background: var(--blue-light); color: var(--blue-dark); }
+  .badge.sunshine { background: var(--amber-light); color: var(--amber-dark); }
+  .badge.sol { background: var(--teal-light); color: var(--teal-dark); }
+  .match { font-size: 13px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .match.away { color: var(--text-secondary); font-style: italic; }
+  .venue { font-size: 11px; color: var(--text-hint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: right; }
+  .empty { font-size: 14px; color: var(--text-secondary); text-align: center; padding: 2rem 0; }
+  @media (max-width: 640px) {
+    .row { grid-template-columns: 52px 44px 80px 1fr; }
+    .venue { display: none; }
+    .stats { grid-template-columns: repeat(2, 1fr); }
+    .stat-num { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <div class="header-top">
+      <h1>Ullern J10/J11 — Kampplan</h1>
+      <span class="season-tag">2026</span>
+    </div>
+    <p class="header-sub">Dolphins (J10 avd. 05 · Lilleaker) · Sol (J10 avd. 04 · Bestum/Bjørnsletta) · Sunshine (J11 avd. 07 · hospitering)</p>
+  </header>
+
+  <div class="stats">
+    <div class="stat"><div class="stat-label">Dolphins kamper</div><div class="stat-num blue">18</div></div>
+    <div class="stat"><div class="stat-label">Sol kamper</div><div class="stat-num teal">18</div></div>
+    <div class="stat"><div class="stat-label">Sunshine kamper</div><div class="stat-num amber">18</div></div>
+    <div class="stat"><div class="stat-label">Datokollisjoner</div><div class="stat-num red" id="conflict-count">—</div></div>
+  </div>
+
+  <div class="conflict-alert" id="conflict-alert"></div>
+
+  <div class="filters">
+    <button class="filter-btn active" onclick="setFilter('all',this)">Alle kamper</button>
+    <button class="filter-btn" onclick="setFilter('dolphins',this)">Dolphins</button>
+    <button class="filter-btn" onclick="setFilter('sol',this)">Sol</button>
+    <button class="filter-btn" onclick="setFilter('sunshine',this)">Sunshine</button>
+    <button class="filter-btn" onclick="setFilter('conflict',this)">Kollisjoner</button>
+    <button class="filter-btn" onclick="setFilter('home',this)">Hjemme</button>
+    <button class="filter-btn" onclick="setFilter('away',this)">Borte</button>
+  </div>
+
+  <div id="calendar"></div>
+</div>
+
+<script>
+const games = [
+  { date: "09.04", sort: "2026-04-09", tid: "19:00", lag: "Dolphins", hjemme: true,  motstander: "Monolitten Idrettslag Rød", bane: "Ullern kunstgress 2 7er B" },
+  { date: "13.04", sort: "2026-04-13", tid: "19:10", lag: "Sunshine", hjemme: true,  motstander: "Huk Vikings", bane: "Ullern kunstgress 2 7er C" },
+  { date: "14.04", sort: "2026-04-14", tid: "18:00", lag: "Dolphins", hjemme: false, motstander: "Try Stars", bane: "Voksen kunstgr. 7er B" },
+  { date: "14.04", sort: "2026-04-14", tid: "18:00", lag: "Sol",      hjemme: true,  motstander: "Snarøya Grønn", bane: "Ullern kunstgress 2 7er C" },
+  { date: "20.04", sort: "2026-04-20", tid: "19:05", lag: "Dolphins", hjemme: true,  motstander: "Stabæk 2", bane: "Ullern kunstgress 2 7er B" },
+  { date: "20.04", sort: "2026-04-20", tid: "19:10", lag: "Sunshine", hjemme: false, motstander: "Lyn TåsenLions", bane: "Kringsjå kunstg. 3 7er D" },
+  { date: "23.04", sort: "2026-04-23", tid: "19:00", lag: "Sol",      hjemme: false, motstander: "Stabæk 1", bane: "Frem kgb 7er B" },
+  { date: "28.04", sort: "2026-04-28", tid: "19:00", lag: "Dolphins", hjemme: false, motstander: "Lyn Hvit", bane: "Kringsjå kunstg. 2 7er B" },
+  { date: "28.04", sort: "2026-04-28", tid: "18:00", lag: "Sunshine", hjemme: true,  motstander: "Ready Rosa", bane: "Ullern kunstgress 2 7er D" },
+  { date: "30.04", sort: "2026-04-30", tid: "19:00", lag: "Sol",      hjemme: true,  motstander: "Øvrevoll Hosle Grav 2", bane: "Ullern kunstgress 7er" },
+  { date: "04.05", sort: "2026-05-04", tid: "19:05", lag: "Sunshine", hjemme: false, motstander: "Røa Bogstad", bane: "Røa kunstgress 2 7er A" },
+  { date: "05.05", sort: "2026-05-05", tid: "17:50", lag: "Sol",      hjemme: false, motstander: "Høvik Tigers", bane: "Høvik kunstgress 7er C" },
+  { date: "05.05", sort: "2026-05-05", tid: "19:00", lag: "Dolphins", hjemme: true,  motstander: "Øvrevoll Hosle Eikeli 1", bane: "Ullern kunstgress 2 7er B" },
+  { date: "13.05", sort: "2026-05-13", tid: "19:00", lag: "Dolphins", hjemme: false, motstander: "Ready Blå", bane: "Ris ungdomsskole kunstgress 7er" },
+  { date: "18.05", sort: "2026-05-18", tid: "19:00", lag: "Sunshine", hjemme: false, motstander: "Vestre Aker Panda", bane: "Voksen kunstgr. 7er D" },
+  { date: "19.05", sort: "2026-05-19", tid: "18:20", lag: "Sol",      hjemme: false, motstander: "Haslum 1", bane: "Haslum kunstgress 7er D" },
+  { date: "26.05", sort: "2026-05-26", tid: "19:00", lag: "Dolphins", hjemme: true,  motstander: "Vestre Aker FC", bane: "Hullebergmyra kunstgress 7er" },
+  { date: "26.05", sort: "2026-05-26", tid: "18:00", lag: "Sunshine", hjemme: true,  motstander: "Monolitten Idrettslag Rød", bane: "Ullern kunstgress 2 7er D" },
+  { date: "28.05", sort: "2026-05-28", tid: "17:45", lag: "Sol",      hjemme: true,  motstander: "Huk Vikings", bane: "Ullern kunstgress 2 7er A" },
+  { date: "01.06", sort: "2026-06-01", tid: "19:10", lag: "Sunshine", hjemme: false, motstander: "Heming GRØNN", bane: "Heming kg 7er" },
+  { date: "02.06", sort: "2026-06-02", tid: "18:00", lag: "Dolphins", hjemme: false, motstander: "Heming Hvit", bane: "Heming kg 7er" },
+  { date: "05.06", sort: "2026-06-05", tid: "18:00", lag: "Sol",      hjemme: false, motstander: "Øvrevoll Hosle Gepards", bane: "Eikeli kunstgress 9er 7er" },
+  { date: "08.06", sort: "2026-06-08", tid: "19:00", lag: "Sol",      hjemme: true,  motstander: "Jardar 1", bane: "Ullern kunstgress 7er" },
+  { date: "09.06", sort: "2026-06-09", tid: "19:00", lag: "Dolphins", hjemme: true,  motstander: "Øvrevoll Hosle Hosle 1", bane: "Hullebergmyra kunstgress 7er" },
+  { date: "11.06", sort: "2026-06-11", tid: "17:45", lag: "Sunshine", hjemme: true,  motstander: "Try Stars", bane: "Ullern kunstgress 2 7er B" },
+  { date: "15.06", sort: "2026-06-15", tid: "19:05", lag: "Sunshine", hjemme: false, motstander: "Frigg Blå", bane: "Marienlyst kunstgress 7er A" },
+  { date: "18.06", sort: "2026-06-18", tid: "19:00", lag: "Dolphins", hjemme: false, motstander: "Røa HuLy", bane: "Røa kunstgress 2 7er C" },
+  { date: "18.06", sort: "2026-06-18", tid: "19:00", lag: "Sol",      hjemme: false, motstander: "Monolitten Idrettslag Blå", bane: "Ferd stadion 7er C (Bygdøy)" },
+  { date: "17.08", sort: "2026-08-17", tid: "19:10", lag: "Sunshine", hjemme: false, motstander: "Huk Vikings", bane: "Bygdøhus 7er B" },
+  { date: "20.08", sort: "2026-08-20", tid: "19:00", lag: "Dolphins", hjemme: false, motstander: "Monolitten Idrettslag Rød", bane: "Ferd stadion 7er D (Bygdøy)" },
+  { date: "20.08", sort: "2026-08-20", tid: "19:00", lag: "Sol",      hjemme: false, motstander: "Snarøya Grønn", bane: "Hundsund kgb 1 7er A" },
+  { date: "24.08", sort: "2026-08-24", tid: "19:00", lag: "Dolphins", hjemme: true,  motstander: "Try Stars", bane: "Hullebergmyra kunstgress 7er" },
+  { date: "24.08", sort: "2026-08-24", tid: "19:00", lag: "Sol",      hjemme: true,  motstander: "Stabæk 1", bane: "Ullern kunstgress 7er" },
+  { date: "27.08", sort: "2026-08-27", tid: "17:45", lag: "Sunshine", hjemme: true,  motstander: "Lyn TåsenLions", bane: "Ullern kunstgress 2 7er B" },
+  { date: "31.08", sort: "2026-08-31", tid: "19:10", lag: "Sunshine", hjemme: false, motstander: "Ready Rosa", bane: "Ris ungdomsskole kunstgress 7er" },
+  { date: "03.09", sort: "2026-09-03", tid: "19:00", lag: "Dolphins", hjemme: false, motstander: "Stabæk 2", bane: "Frem kgb 7er A" },
+  { date: "03.09", sort: "2026-09-03", tid: "19:00", lag: "Sol",      hjemme: false, motstander: "Øvrevoll Hosle Grav 2", bane: "Jarmyra 7er A" },
+  { date: "07.09", sort: "2026-09-07", tid: "19:00", lag: "Dolphins", hjemme: true,  motstander: "Lyn Hvit", bane: "Hullebergmyra kunstgress 7er" },
+  { date: "07.09", sort: "2026-09-07", tid: "19:00", lag: "Sol",      hjemme: true,  motstander: "Høvik Tigers", bane: "Ullern kunstgress 7er" },
+  { date: "10.09", sort: "2026-09-10", tid: "17:45", lag: "Sunshine", hjemme: true,  motstander: "Røa Bogstad", bane: "Ullern kunstgress 2 7er A" },
+  { date: "14.09", sort: "2026-09-14", tid: "19:00", lag: "Sol",      hjemme: true,  motstander: "Haslum 1", bane: "Ullern kunstgress 7er" },
+  { date: "17.09", sort: "2026-09-17", tid: "18:15", lag: "Dolphins", hjemme: false, motstander: "Øvrevoll Hosle Eikeli 1", bane: "Jarmyra 7er A" },
+  { date: "17.09", sort: "2026-09-17", tid: "17:45", lag: "Sunshine", hjemme: true,  motstander: "Vestre Aker Panda", bane: "Ullern kunstgress 2 7er B" },
+  { date: "21.09", sort: "2026-09-21", tid: "19:10", lag: "Sunshine", hjemme: false, motstander: "Monolitten Idrettslag Rød", bane: "Ferd stadion 7er B (Bygdøy)" },
+  { date: "22.09", sort: "2026-09-22", tid: "19:00", lag: "Sol",      hjemme: false, motstander: "Huk Vikings", bane: "Bygdøhus 7er B" },
+  { date: "24.09", sort: "2026-09-24", tid: "19:00", lag: "Dolphins", hjemme: true,  motstander: "Ready Blå", bane: "Hullebergmyra kunstgress 7er" },
+  { date: "05.10", sort: "2026-10-05", tid: "19:00", lag: "Sol",      hjemme: true,  motstander: "Øvrevoll Hosle Gepards", bane: "Ullern kunstgress 7er" },
+  { date: "08.10", sort: "2026-10-08", tid: "17:45", lag: "Sunshine", hjemme: true,  motstander: "Heming GRØNN", bane: "Ullern kunstgress 2 7er B" },
+  { date: "10.10", sort: "2026-10-10", tid: "13:00", lag: "Dolphins", hjemme: false, motstander: "Vestre Aker FC", bane: "Voksen kunstgr. 7er D" },
+  { date: "12.10", sort: "2026-10-12", tid: "19:00", lag: "Dolphins", hjemme: true,  motstander: "Heming Hvit", bane: "Ullern kunstgress 2 7er B" },
+  { date: "12.10", sort: "2026-10-12", tid: "19:10", lag: "Sunshine", hjemme: false, motstander: "Try Stars", bane: "Voksen kunstgr. 7er C" },
+  { date: "15.10", sort: "2026-10-15", tid: "19:00", lag: "Sol",      hjemme: false, motstander: "Jardar 1", bane: "Bjørnegård kunstg. 7er A" },
+  { date: "19.10", sort: "2026-10-19", tid: "19:10", lag: "Sunshine", hjemme: true,  motstander: "Frigg Blå", bane: "Ullern kunstgress 7er" },
+  { date: "19.10", sort: "2026-10-19", tid: "19:00", lag: "Sol",      hjemme: true,  motstander: "Monolitten Idrettslag Blå", bane: "Hullebergmyra kunstgress 7er" },
+  { date: "24.10", sort: "2026-10-24", tid: "13:00", lag: "Dolphins", hjemme: false, motstander: "Øvrevoll Hosle Hosle 1", bane: "Eikeli kunstgress 9er 7er" },
+  { date: "27.10", sort: "2026-10-27", tid: "19:00", lag: "Dolphins", hjemme: true,  motstander: "Røa HuLy", bane: "Hullebergmyra kunstgress 7er" }
+];
+
+const conflictDates = new Set(
+  Object.entries(games.reduce((a, g) => { a[g.sort] = (a[g.sort]||0)+1; return a; }, {}))
+    .filter(([,v]) => v > 1).map(([k]) => k)
+);
+
+document.getElementById('conflict-count').textContent = conflictDates.size;
+
+const conflictList = [...conflictDates].sort().map(d => {
+  const parts = d.split('-');
+  return parts[2] + '.' + parts[1];
+}).join(', ');
+document.getElementById('conflict-alert').innerHTML =
+  `<strong>Datokollisjoner (${conflictDates.size} dager med to eller flere kamper):</strong> ${conflictList}. Vær ekstra obs på hospitanter og koordinering disse dagene.`;
+
+let currentFilter = 'all';
+
+function setFilter(f, btn) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  render();
+}
+
+function render() {
+  const filtered = games.filter(g => {
+    if (currentFilter === 'dolphins')  return g.lag === 'Dolphins';
+    if (currentFilter === 'sol')       return g.lag === 'Sol';
+    if (currentFilter === 'sunshine')  return g.lag === 'Sunshine';
+    if (currentFilter === 'conflict')  return conflictDates.has(g.sort);
+    if (currentFilter === 'home')      return g.hjemme;
+    if (currentFilter === 'away')      return !g.hjemme;
+    return true;
+  });
+
+  const monthNames = {
+    '2026-04': 'April', '2026-05': 'Mai', '2026-06': 'Juni',
+    '2026-08': 'August', '2026-09': 'September', '2026-10': 'Oktober'
+  };
+  const byMonth = {};
+  filtered.forEach(g => {
+    const m = g.sort.slice(0,7);
+    if (!byMonth[m]) byMonth[m] = [];
+    byMonth[m].push(g);
+  });
+
+  let html = '';
+  if (!filtered.length) {
+    html = '<p class="empty">Ingen kamper i valgt filter.</p>';
+  } else {
+    Object.keys(byMonth).sort().forEach(m => {
+      html += `<div class="month-group"><div class="month-label">${monthNames[m] || m}</div>`;
+      byMonth[m].sort((a,b) => a.sort > b.sort ? 1 : a.sort < b.sort ? -1 : 0).forEach(g => {
+        const isConflict = conflictDates.has(g.sort);
+        const lagClass = g.lag.toLowerCase();
+        const matchLabel = g.hjemme ? `vs ${g.motstander}` : `@ ${g.motstander}`;
+        const matchClass = g.hjemme ? 'match' : 'match away';
+        html += `<div class="row${isConflict ? ' conflict' : ''}">
+          <span class="date">${g.date}</span>
+          <span class="time">${g.tid}</span>
+          <span class="badge ${lagClass}">${g.lag}</span>
+          <span class="${matchClass}">${matchLabel}</span>
+          <span class="venue">${g.bane}</span>
+        </div>`;
+      });
+      html += '</div>';
+    });
+  }
+  document.getElementById('calendar').innerHTML = html;
+}
+
+render();
+</script>
+</body>
+</html>
