@@ -83,13 +83,15 @@
   <div class="conflict-alert" id="conflict-alert"></div>
 
   <div class="filters">
-    <button class="filter-btn active" onclick="setFilter('all',this)">Alle kamper</button>
-    <button class="filter-btn" onclick="setFilter('dolphins',this)">Dolphins</button>
-    <button class="filter-btn" onclick="setFilter('sol',this)">Sol</button>
-    <button class="filter-btn" onclick="setFilter('sunshine',this)">Sunshine</button>
-    <button class="filter-btn" onclick="setFilter('conflict',this)">Kollisjoner</button>
-    <button class="filter-btn" onclick="setFilter('home',this)">Hjemme</button>
-    <button class="filter-btn" onclick="setFilter('away',this)">Borte</button>
+    <button class="filter-btn active" data-filter="all" onclick="toggleFilter('all',this)">Alle kamper</button>
+    <button class="filter-btn" data-filter="dolphins" onclick="toggleFilter('dolphins',this)">Dolphins</button>
+    <button class="filter-btn" data-filter="sol" onclick="toggleFilter('sol',this)">Sol</button>
+    <button class="filter-btn" data-filter="sunshine" onclick="toggleFilter('sunshine',this)">Sunshine</button>
+    <button class="filter-btn" data-filter="conflict" onclick="toggleFilter('conflict',this)">Kollisjoner</button>
+    <button class="filter-btn" data-filter="home" onclick="toggleFilter('home',this)">Hjemme</button>
+    <button class="filter-btn" data-filter="away" onclick="toggleFilter('away',this)">Borte</button>
+    <button class="filter-btn" data-filter="spring" onclick="toggleFilter('spring',this)">Vårsesong</button>
+    <button class="filter-btn" data-filter="autumn" onclick="toggleFilter('autumn',this)">Høstsesong</button>
   </div>
 
   <div id="calendar"></div>
@@ -169,23 +171,38 @@ const conflictList = [...conflictDates].sort().map(d => {
 document.getElementById('conflict-alert').innerHTML =
   `<strong>Datokollisjoner (${conflictDates.size} dager med to eller flere kamper):</strong> ${conflictList}. Vær ekstra obs på hospitanter og koordinering disse dagene.`;
 
-let currentFilter = 'all';
+const TEAM_FILTERS   = new Set(['dolphins', 'sol', 'sunshine']);
+const SEASON_FILTERS = new Set(['spring', 'autumn']);
+let activeFilters = new Set();
 
-function setFilter(f, btn) {
-  currentFilter = f;
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
+function toggleFilter(f) {
+  if (f === 'all') {
+    activeFilters.clear();
+  } else {
+    activeFilters.has(f) ? activeFilters.delete(f) : activeFilters.add(f);
+  }
+  document.querySelectorAll('.filter-btn').forEach(b => {
+    const key = b.dataset.filter;
+    b.classList.toggle('active', key === 'all' ? activeFilters.size === 0 : activeFilters.has(key));
+  });
   render();
 }
 
 function render() {
+  const activeTeams   = [...activeFilters].filter(f => TEAM_FILTERS.has(f));
+  const activeSeasons = [...activeFilters].filter(f => SEASON_FILTERS.has(f));
+
   const filtered = games.filter(g => {
-    if (currentFilter === 'dolphins')  return g.lag === 'Dolphins';
-    if (currentFilter === 'sol')       return g.lag === 'Sol';
-    if (currentFilter === 'sunshine')  return g.lag === 'Sunshine';
-    if (currentFilter === 'conflict')  return conflictDates.has(g.sort);
-    if (currentFilter === 'home')      return g.hjemme;
-    if (currentFilter === 'away')      return !g.hjemme;
+    const month = g.sort.slice(5, 7);
+    if (activeTeams.length   && !activeTeams.includes(g.lag.toLowerCase())) return false;
+    if (activeSeasons.length) {
+      const inSpring = activeSeasons.includes('spring') && ['04','05','06'].includes(month);
+      const inAutumn = activeSeasons.includes('autumn') && ['08','09','10'].includes(month);
+      if (!inSpring && !inAutumn) return false;
+    }
+    if (activeFilters.has('conflict') && !conflictDates.has(g.sort)) return false;
+    if (activeFilters.has('home')     && !g.hjemme)  return false;
+    if (activeFilters.has('away')     &&  g.hjemme)  return false;
     return true;
   });
 
