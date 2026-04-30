@@ -42,10 +42,11 @@
   .filter-btn.active { background: var(--text-primary); color: white; border-color: var(--text-primary); font-weight: 500; }
   .month-group { margin-bottom: 1.5rem; }
   .month-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-hint); margin-bottom: 8px; padding-left: 4px; }
-  .row { display: grid; grid-template-columns: 60px 48px 90px 1fr 130px; gap: 10px; align-items: center; padding: 10px 14px; border-radius: 8px; border: 0.5px solid var(--gray-border); background: white; margin-bottom: 3px; transition: border-color 0.1s; }
+  .row { display: grid; grid-template-columns: 60px 32px 48px 90px 1fr 130px; gap: 10px; align-items: center; padding: 10px 14px; border-radius: 8px; border: 0.5px solid var(--gray-border); background: white; margin-bottom: 3px; transition: border-color 0.1s; }
   .row:hover { border-color: var(--gray-border-strong); }
   .row.conflict { border-left: 2.5px solid var(--red-mid); }
   .date { font-family: 'DM Mono', monospace; font-size: 12px; font-weight: 500; color: var(--text-primary); }
+  .weekday { font-size: 11px; color: var(--text-hint); }
   .time { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text-secondary); }
   .badge { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; text-align: center; letter-spacing: 0.02em; white-space: nowrap; }
   .badge.dolphins { background: var(--blue-light); color: var(--blue-dark); }
@@ -57,6 +58,7 @@
   .empty { font-size: 14px; color: var(--text-secondary); text-align: center; padding: 2rem 0; }
   @media (max-width: 640px) {
     .row { grid-template-columns: 52px 44px 80px 1fr; }
+    .weekday { display: none; }
     .venue { display: none; }
     .stats { grid-template-columns: repeat(2, 1fr); }
     .stat-num { font-size: 22px; }
@@ -228,8 +230,11 @@ function render() {
         const lagClass = g.lag.toLowerCase();
         const matchLabel = g.hjemme ? `vs ${g.motstander}` : `@ ${g.motstander}`;
         const matchClass = g.hjemme ? 'match' : 'match away';
+        const [y,mo,d] = g.sort.split('-').map(Number);
+        const dagNavn = ['Søn','Man','Tir','Ons','Tor','Fre','Lør'][new Date(y,mo-1,d).getDay()];
         html += `<div class="row${isConflict ? ' conflict' : ''}">
           <span class="date">${g.date}</span>
+          <span class="weekday">${dagNavn}</span>
           <span class="time">${g.tid}</span>
           <span class="badge ${lagClass}">${g.lag}</span>
           <span class="${matchClass}">${matchLabel}</span>
